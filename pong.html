@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>2 Player Pong</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; background: #111; margin: 0; }
+    </style>
+</head>
+<body>
+    <script>
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        document.body.appendChild(canvas);
+        canvas.width = 600; canvas.height = 400;
+        canvas.style.background = "black";
+
+        let p1Y = 170, p2Y = 170, ballX = 300, ballY = 200, dx = 4, dy = 4;
+        let p1Score = 0, p2Score = 0;
+        let keys = {};
+
+        window.addEventListener("keydown", e => keys[e.key] = true);
+        window.addEventListener("keyup", e => keys[e.key] = false);
+
+        function loop() {
+            // 1. Player 1 Movement (Left Paddle - W/S)
+            if (keys["w"] && p1Y > 0) p1Y -= 5;
+            if (keys["s"] && p1Y < 340) p1Y += 5;
+
+            // 2. Player 2 Movement (Right Paddle - ArrowUp/ArrowDown)
+            if (keys["ArrowUp"] && p2Y > 0) p2Y -= 5;
+            if (keys["ArrowDown"] && p2Y < 340) p2Y += 5;
+
+            // 3. Move Ball & Wall Bounces
+            ballX += dx; ballY += dy;
+            if (ballY < 0 || ballY > 390) dy = -dy;
+
+            // 4. Paddle Collisions
+            if (ballX < 10 && ballY > p1Y && ballY < p1Y + 60) dx = Math.abs(dx);
+            if (ballX > 580 && ballY > p2Y && ballY < p2Y + 60) dx = -Math.abs(dx);
+
+            // 5. Scoring & Reset
+            if (ballX < 0 || ballX > 600) {
+                ballX < 0 ? p2Score++ : p1Score++;
+                ballX = 300; ballY = 200; dx = -dx;
+            } // <--- Fixed: Replaced commented out brace
+
+            // 6. Draw Game Objects
+            ctx.clearRect(0, 0, 600, 400);
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, p1Y, 10, 60);            // Player 1 Paddle
+            ctx.fillRect(590, p2Y, 10, 60);           // Player 2 Paddle
+            ctx.fillRect(ballX, ballY, 10, 10);        // Ball
+            ctx.font = "20px Arial";
+            ctx.fillText(`${p1Score}   ${p2Score}`, 280, 30); // Score Display
+
+            requestAnimationFrame(loop);
+        }
+        loop();
+    </script>
+</body>
+</html>
